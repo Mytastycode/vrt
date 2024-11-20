@@ -1,15 +1,31 @@
-import { Injectable, signal } from "@angular/core";
+import { effect, Injectable, signal} from "@angular/core";
 
 @Injectable({providedIn: 'root'})
 export class ThemeService{
 
-  themeSignal = signal<string>("light");
+  private defaultTheme = 'light';
 
-  setTheme(theme: string){
-    this.themeSignal.set(theme);
-  }
+  themeSignal = signal<string>(this.getDefaultTheme());
 
-  updateTheme(){
-    this.themeSignal.update(value => (value === "dark" ? "light" : "dark"))
-  }
+constructor(){
+  effect(() => {
+    window.localStorage.setItem('themeSignal', JSON.stringify(this.themeSignal()))
+  });
+}
+
+private getDefaultTheme(): string{
+
+  const storedTheme = window.localStorage.getItem('themeSignal');
+
+  return storedTheme ? JSON.parse(storedTheme) : this.defaultTheme;
+}
+
+setTheme(theme: string){
+  this.themeSignal.set(theme);
+}
+
+updateTheme(){
+  this.themeSignal.update(value => (value === "dark" ? "light" : "dark"))
+}
+
 }
